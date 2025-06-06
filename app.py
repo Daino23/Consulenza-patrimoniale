@@ -65,8 +65,22 @@ if st.session_state.step == 0:
             st.session_state.familiari.append(nome_fam)
     st.session_state.responses["Altri familiari a carico"] = familiari_input
 
-    if st.button("Prosegui alla sezione patrimoniale"):
-        st.session_state.step = 1
+    col1, col2 = st.columns([8, 2])
+    with col2:
+        st.markdown("""
+            <style>
+            .stButton>button {
+                width: 100%;
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+                padding: 0.75em;
+                margin-top: 1em;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("Prosegui ➡️"):
+            st.session_state.step = 1
 
 # STEP 1 - Patrimonio
 if st.session_state.step >= 1:
@@ -101,8 +115,22 @@ if st.session_state.step >= 1:
 
     st.session_state.responses["Patrimonio dettagliato"] = patrimonio
 
-    if st.button("Prosegui alla sezione successiva"):
-        st.session_state.step = 2
+    col1, col2 = st.columns([8, 2])
+    with col2:
+        st.markdown("""
+            <style>
+            .stButton>button {
+                width: 100%;
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+                padding: 0.75em;
+                margin-top: 1em;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("Prosegui ➡️", key="prosegui_step1"):
+            st.session_state.step = 2
 
 # STEP 2 - Pianificazione successoria
 if st.session_state.step >= 2:
@@ -117,5 +145,19 @@ if st.session_state.step >= 2:
         risposta = st.text_area(campo)
         st.session_state.responses[campo] = risposta
 
-    if st.button("Fine o esporta documento"):
-        st.session_state.step = 3
+    col1, col2 = st.columns([8, 2])
+    with col2:
+        st.markdown("""
+            <style>
+            .stButton>button {
+                width: 100%;
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+                padding: 0.75em;
+                margin-top: 1em;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("Fine o esporta documento"):
+            st.session_state.step = 3
