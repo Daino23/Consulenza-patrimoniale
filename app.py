@@ -7,14 +7,10 @@ st.set_page_config(page_title="Consulenza Patrimoniale - Studio Dainotti", layou
 st.title("Scheda Consulenza Patrimoniale - Studio Dainotti")
 
 def init_state():
-    if "step" not in st.session_state:
-        st.session_state.step = 0
+    if "tab_index" not in st.session_state:
+        st.session_state.tab_index = 0
     if "responses" not in st.session_state:
         st.session_state.responses = {}
-    if "familiari" not in st.session_state:
-        st.session_state.familiari = []
-    if "figli" not in st.session_state:
-        st.session_state.figli = []
     if "familiari_count" not in st.session_state:
         st.session_state.familiari_count = 0
     if "patrimonio_count" not in st.session_state:
@@ -39,8 +35,12 @@ custom_button_style = """
     </style>
 """
 
-# STEP 0 - Famiglia
-if st.session_state.step == 0:
+
+tabs = ["Famiglia", "Patrimonio", "Debiti", "Obiettivi", "Documento"]
+current_tab = st.session_state.tab_index
+tab_objects = st.tabs(tabs)
+
+with tab_objects[0]:
     st.header("🏠 Famiglia e situazione personale")
     st.session_state.responses["Nome e cognome"] = st.text_input("Nome e cognome")
     st.session_state.responses["Data e luogo di nascita"] = st.text_input("Data e luogo di nascita")
@@ -80,12 +80,11 @@ if st.session_state.step == 0:
     with col2:
         st.markdown(custom_button_style, unsafe_allow_html=True)
         st.markdown('<div class="prosegui-button">', unsafe_allow_html=True)
-        if st.button("Prosegui ➡️", key="to_step_1"):
-            st.session_state.step = 1
+        if st.button("Prosegui ➡️", key="step1"):
+            st.session_state.tab_index = 1
         st.markdown('</div>', unsafe_allow_html=True)
 
-# STEP 1 - Patrimonio
-if st.session_state.step == 1:
+with tab_objects[1]:
     st.header("💼 Area patrimoniale")
     if st.button("➕ Aggiungi bene patrimoniale"):
         st.session_state.patrimonio_count += 1
@@ -102,14 +101,10 @@ if st.session_state.step == 1:
 
     col1, col2 = st.columns([8, 2])
     with col2:
-        st.markdown(custom_button_style, unsafe_allow_html=True)
-        st.markdown('<div class="prosegui-button">', unsafe_allow_html=True)
-        if st.button("Prosegui ➡️", key="to_step_2"):
-            st.session_state.step = 2
-        st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Prosegui ➡️", key="step2"):
+            st.session_state.tab_index = 2
 
-# STEP 2 - Debiti ricorrenti
-if st.session_state.step == 2:
+with tab_objects[2]:
     st.header("💳 Debiti ricorrenti")
     if st.button("➕ Aggiungi debito"):
         st.session_state.debiti_count += 1
@@ -124,14 +119,10 @@ if st.session_state.step == 2:
 
     col1, col2 = st.columns([8, 2])
     with col2:
-        st.markdown(custom_button_style, unsafe_allow_html=True)
-        st.markdown('<div class="prosegui-button">', unsafe_allow_html=True)
-        if st.button("Prosegui ➡️", key="to_step_3"):
-            st.session_state.step = 3
-        st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Prosegui ➡️", key="step3"):
+            st.session_state.tab_index = 3
 
-# STEP 3 - Obiettivi economici
-if st.session_state.step == 3:
+with tab_objects[3]:
     st.header("🎯 Obiettivi economici")
 
     if st.button("➕ Aggiungi obiettivo"):
@@ -148,14 +139,10 @@ if st.session_state.step == 3:
 
     col1, col2 = st.columns([8, 2])
     with col2:
-        st.markdown(custom_button_style, unsafe_allow_html=True)
-        st.markdown('<div class="prosegui-button">', unsafe_allow_html=True)
-        if st.button("Prosegui ➡️", key="to_step_4"):
-            st.session_state.step = 4
-        st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Prosegui ➡️", key="step4"):
+            st.session_state.tab_index = 4
 
-# STEP 4 - Genera documento
-if st.session_state.step == 4:
+with tab_objects[4]:
     st.header("📄 Genera documento Word")
 
     if st.button("Crea documento Word"):
