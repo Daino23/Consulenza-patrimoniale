@@ -1,17 +1,19 @@
-
 import streamlit as st
 from docx import Document
 from datetime import date
 from io import BytesIO
 
 st.set_page_config(page_title="Consulenza Patrimoniale - Studio Dainotti", layout="wide")
-
 st.title("Scheda Consulenza Patrimoniale - Studio Dainotti")
 
+# Inizializza lo stato
 def init_state():
     if "responses" not in st.session_state:
         st.session_state.responses = {}
 
+init_state()
+
+# Sezioni e domande
 sections = {
     "🏠 Famiglia e situazione personale": [
         "Nome e cognome", "Data e luogo di nascita", "Codice fiscale", "Indirizzo", "Stato civile",
@@ -37,41 +39,48 @@ sections = {
     ]
 }
 
-init_state()
+# Aggiunta di un tab finale per l'esportazione
+tab_titles = list(sections.keys()) + ["📄 Esporta documento"]
+tabs = st.tabs(tab_titles)
 
-tabs = st.tabs(list(sections.keys()))
-
-for i, (section, questions) in enumerate(sections.items()):
+# Tab di compilazione
+for i, section in enumerate(sections.keys()):
     with tabs[i]:
         st.header(section)
-        for question in questions:
+        for question in sections[section]:
             response = st.text_area(question, key=question)
             st.session_state.responses[question] = response
 
-if st.button("Genera documento Word"):
-    doc = Document()
+# Tab finale: esportazione documento
+with tabs[-1]:
+    st.header("📄 Esporta il documento Word finale")
 
-    # Intestazione
-    section = doc.sections[0]
-    header = section.header.paragraphs[0]
-    header.text = "Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\n" \
-                  "Via Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com"
+    if st.button("Genera documento Word"):
+        doc = Document()
 
-    doc.add_paragraph(f"Data compilazione: {date.today().strftime('%d/%m/%Y')}")
-    doc.add_heading("Scheda Raccolta Informazioni - Consulenza Patrimoniale", 0)
+        # Intestazione
+        section = doc.sections[0]
+        header = section.header.paragraphs[0]
+        header.text = "Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\n" \
+                      "Via Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com"
 
-    for section_title, questions in sections.items():
-        doc.add_heading(section_title, level=1)
-        for question in questions:
-            answer = st.session_state.responses.get(question, "")
-            doc.add_paragraph(f"{question}: {answer}")
+        doc.add_paragraph(f"Data compilazione: {date.today().strftime('%d/%m/%Y')}")
+        doc.add_heading("Scheda Raccolta Informazioni - Consulenza Patrimoniale", 0)
 
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+        for section_title, questions in sections.items():
+            doc.add_heading(section_title, level=1)
+            for question in questions:
+                answer = st.session_state.responses.get(question, "")
+                doc.add_paragraph(f"{question}: {answer}")
 
-    st.success("Documento generato con successo!")
-    st.download_button(label="📄 Scarica il file Word",
-                       data=buffer,
-                       file_name="Scheda_Consulenza_Patrimoniale.docx",
-                       mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.success("Documento generato con successo!")
+        st.download_button(
+            label="📥 Scarica il file Word",
+            data=buffer,
+            file_name="Scheda_Consulenza_Patrimoniale.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
