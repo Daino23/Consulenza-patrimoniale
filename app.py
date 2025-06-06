@@ -150,3 +150,52 @@ with tab_objects[4]:
             file_name="scheda_consulenza_patrimoniale.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+    if st.button("📊 Scarica file Excel"):
+        import pandas as pd
+
+        patrimonio_data = []
+        for i in range(st.session_state.patrimonio_count):
+            tipo = st.session_state.get(f"tipo_{i}", "")
+            descrizione = st.session_state.get(f"desc_{i}", "")
+            intestatario = st.session_state.get(f"intest_{i}", "")
+            valore = st.session_state.get(f"valore_{i}", 0.0)
+            patrimonio_data.append({
+                "Tipo": tipo,
+                "Descrizione": descrizione,
+                "Intestatario": intestatario,
+                "Valore (€)": valore
+            })
+
+        debiti_data = []
+        for i in range(st.session_state.debiti_count):
+            tipo = st.session_state.get(f"deb_tipo_{i}", "")
+            importo = st.session_state.get(f"deb_importo_{i}", 0.0)
+            debiti_data.append({
+                "Tipo": tipo,
+                "Importo mensile (€)": importo
+            })
+
+        obiettivi_data = []
+        for i in range(st.session_state.obiettivi_count):
+            descrizione = st.session_state.get(f"ob_desc_{i}", "")
+            importo = st.session_state.get(f"ob_importo_{i}", 0.0)
+            tempo = st.session_state.get(f"ob_tempo_{i}", "")
+            obiettivi_data.append({
+                "Obiettivo": descrizione,
+                "Importo (€)": importo,
+                "Tempo previsto": tempo
+            })
+
+        with BytesIO() as output:
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                pd.DataFrame(patrimonio_data).to_excel(writer, index=False, sheet_name="Patrimonio")
+                pd.DataFrame(debiti_data).to_excel(writer, index=False, sheet_name="Debiti")
+                pd.DataFrame(obiettivi_data).to_excel(writer, index=False, sheet_name="Obiettivi")
+            output.seek(0)
+
+            st.download_button(
+                label="📊 Scarica file Excel",
+                data=output,
+                file_name="dati_consulenza.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
