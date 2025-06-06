@@ -13,13 +13,9 @@ def init_state():
 
 init_state()
 
-# Sezioni e domande
+# Sezioni (Famiglia è dinamica)
 sections = {
-    "🏠 Famiglia e situazione personale": [
-        "Nome e cognome", "Data e luogo di nascita", "Codice fiscale", "Indirizzo", "Stato civile",
-        "Coniuge", "Figli", "Altri familiari a carico",
-        "Occupazione", "Reddito lordo annuo", "Altri redditi", "Debiti ricorrenti"
-    ],
+    "🏠 Famiglia e situazione personale": [],
     "💼 Area patrimoniale": [
         "Indirizzo immobile", "Intestatario e quota", "Valore stimato", "Uso", "Mutui o vincoli presenti",
         "Conti correnti", "Investimenti", "Polizze vita", "Fondi pensione",
@@ -39,39 +35,103 @@ sections = {
     ]
 }
 
-# Aggiunta di un tab finale per l'esportazione
 tab_titles = list(sections.keys()) + ["📄 Esporta documento"]
 tabs = st.tabs(tab_titles)
 
-# Tab di compilazione
-for i, section in enumerate(sections.keys()):
-    with tabs[i]:
+# TAB 0 - Famiglia (dinamico)
+with tabs[0]:
+    st.header("🏠 Famiglia e situazione personale")
+
+    st.session_state.responses["Nome e cognome"] = st.text_input("Nome e cognome")
+    st.session_state.responses["Data e luogo di nascita"] = st.text_input("Data e luogo di nascita")
+    st.session_state.responses["Codice fiscale"] = st.text_input("Codice fiscale")
+    st.session_state.responses["Indirizzo"] = st.text_input("Indirizzo")
+    
+    stato_civile = st.selectbox("Stato civile", ["", "Celibe/Nubile", "Coniugato/a", "Separato/a", "Divorziato/a", "Vedovo/a"])
+    st.session_state.responses["Stato civile"] = stato_civile
+
+    if stato_civile == "Coniugato/a":
+        st.subheader("👫 Dati del coniuge")
+        st.session_state.responses["Coniuge"] = st.text_input("Nome e cognome del coniuge")
+
+    ha_figli = st.checkbox("Hai figli?")
+    figli = []
+    if ha_figli:
+        num_figli = st.number_input("Quanti figli vuoi inserire?", min_value=1, step=1)
+        for i in range(int(num_figli)):
+            with st.expander(f"Figlio #{i+1}"):
+                nome = st.text_input(f"Nome figlio #{i+1}", key=f"figlio_nome_{i}")
+                nascita = st.text_input(f"Data di nascita figlio #{i+1}", key=f"figlio_nascita_{i}")
+                codice = st.text_input(f"Codice fiscale figlio #{i+1}", key=f"figlio_cf_{i}")
+                figli.append(f"{nome} - {nascita} - {codice}")
+    st.session_state.responses["Figli"] = figli
+
+    st.subheader("👥 Altri familiari a carico")
+    if "familiari_count" not in st.session_state:
+        st.session_state.familiari_count = 0
+        st.session_state.familiari = []
+
+    if st.button("➕ Aggiungi familiare a carico"):
+        st.session_state.familiari_count += 1
+
+    familiari_input = []
+    for i in range(st.session_state.familiari_count):
+        with st.expander(f"Familiare a carico #{i+1}"):
+            parentela = st.selectbox(f"Parentela #{i+1}", ["Genitore", "Fratello/Sorella", "Altro"], key=f"parentela_{i}")
+            nome = st.text_input(f"Nome familiare #{i+1}", key=f"fam_nome_{i}")
+            nascita = st.text_input(f"Data di nascita #{i+1}", key=f"fam_nascita_{i}")
+            codice = st.text_input(f"Codice fiscale #{i+1}", key=f"fam_cf_{i}")
+            note = st.text_area(f"Note #{i+1}", key=f"fam_note_{i}")
+            familiari_input.append(f"{parentela}: {nome} - {nascita} - {codice}. Note: {note}")
+    st.session_state.responses["Altri familiari a carico"] = familiari_input
+
+    st.subheader("💼 Situazione lavorativa e reddituale")
+    st.session_state.responses["Occupazione"] = st.text_input("Occupazione")
+    st.session_state.responses["Reddito lordo annuo"] = st.text_input("Reddito lordo annuo")
+    st.session_state.responses["Altri redditi"] = st.text_area("Altri redditi")
+    st.session_state.responses["Debiti ricorrenti"] = st.text_area("Debiti ricorrenti")
+
+# Altri tab statici
+for i, section in enumerate(list(sections.keys())[1:]):
+    with tabs[i+1]:
         st.header(section)
         for question in sections[section]:
             response = st.text_area(question, key=question)
             st.session_state.responses[question] = response
 
-# Tab finale: esportazione documento
+# TAB Finale - Esporta
 with tabs[-1]:
     st.header("📄 Esporta il documento Word finale")
 
+    st.subheader("🔍 Riepilogo delle risposte")
+    for key, value in st.session_state.responses.items():
+        if isinstance(value, list):
+            if value:
+                st.markdown(f"**{key}:**")
+                for v in value:
+                    st.markdown(f"- {v}")
+        elif value:
+            st.markdown(f"**{key}:** {value}")
+
     if st.button("Genera documento Word"):
         doc = Document()
-
-        # Intestazione
-        section = doc.sections[0]
-        header = section.header.paragraphs[0]
+        header = doc.sections[0].header.paragraphs[0]
         header.text = "Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\n" \
                       "Via Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com"
 
         doc.add_paragraph(f"Data compilazione: {date.today().strftime('%d/%m/%Y')}")
         doc.add_heading("Scheda Raccolta Informazioni - Consulenza Patrimoniale", 0)
 
-        for section_title, questions in sections.items():
+        for section_title in sections:
             doc.add_heading(section_title, level=1)
-            for question in questions:
-                answer = st.session_state.responses.get(question, "")
-                doc.add_paragraph(f"{question}: {answer}")
+            for key in st.session_state.responses:
+                if key in sections[section_title] or section_title == "🏠 Famiglia e situazione personale":
+                    value = st.session_state.responses[key]
+                    if isinstance(value, list):
+                        for item in value:
+                            doc.add_paragraph(f"- {item}")
+                    else:
+                        doc.add_paragraph(f"{key}: {value}")
 
         buffer = BytesIO()
         doc.save(buffer)
