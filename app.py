@@ -1,4 +1,3 @@
-
 import streamlit as st
 from docx import Document
 from datetime import date
@@ -82,25 +81,25 @@ with tabs[0]:
     st.session_state.responses["Occupazione"] = st.text_input("Occupazione")
     st.session_state.responses["Reddito lordo annuo"] = st.text_input("Reddito lordo annuo")
     st.session_state.responses["Altri redditi"] = st.text_area("Altri redditi")
-   st.subheader("💳 Debiti ricorrenti")
 
-if "debiti_count" not in st.session_state:
-    st.session_state.debiti_count = 0
-    st.session_state.debiti = []
+    st.subheader("💳 Debiti ricorrenti")
 
-if st.button("➕ Aggiungi debito ricorrente"):
-    st.session_state.debiti_count += 1
+    if "debiti_count" not in st.session_state:
+        st.session_state.debiti_count = 0
+        st.session_state.debiti = []
 
-debiti_input = []
-for i in range(st.session_state.debiti_count):
-    with st.expander(f"Debito ricorrente #{i+1}"):
-        tipo = st.text_input(f"Tipo di debito #{i+1}", key=f"tipo_debito_{i}")
-        importo = st.number_input(f"Importo mensile in euro #{i+1}", min_value=0.0, step=10.0, key=f"importo_debito_{i}")
-        debiti_input.append(f"{tipo} - {importo:.2f} € / mese")
+    if st.button("➕ Aggiungi debito ricorrente"):
+        st.session_state.debiti_count += 1
 
-st.session_state.responses["Debiti ricorrenti"] = debiti_input
+    debiti_input = []
+    for i in range(st.session_state.debiti_count):
+        with st.expander(f"Debito ricorrente #{i+1}"):
+            tipo = st.text_input(f"Tipo di debito #{i+1}", key=f"tipo_debito_{i}")
+            importo = st.number_input(f"Importo mensile in euro #{i+1}", min_value=0.0, step=10.0, key=f"importo_debito_{i}")
+            debiti_input.append(f"{tipo} - {importo:.2f} € / mese")
+    st.session_state.responses["Debiti ricorrenti"] = debiti_input
 
-# TAB 1 - Area patrimoniale
+# TAB 1 - Patrimonio
 with tabs[1]:
     st.header("💼 Area patrimoniale")
     if "patrimonio_count" not in st.session_state:
@@ -129,7 +128,7 @@ with tabs[1]:
 
     st.session_state.responses["Patrimonio dettagliato"] = patrimonio
 
-# TAB 2 - Pianificazione successoria
+# TAB 2 - Successoria
 with tabs[2]:
     st.header("⚖️ Pianificazione successoria e protezione")
     for question in sections["⚖️ Pianificazione successoria e protezione"]:
@@ -166,9 +165,7 @@ with tabs[5]:
 
     if st.button("Genera documento Word"):
         doc = Document()
-        header = doc.sections[0].header.paragraphs[0]
-        header.text = "Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\n" \
-                      "Via Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com"
+        doc.add_paragraph("Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\nVia Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com")
         doc.add_paragraph(f"Data compilazione: {date.today().strftime('%d/%m/%Y')}")
         doc.add_heading("Scheda Raccolta Informazioni - Consulenza Patrimoniale", 0)
 
