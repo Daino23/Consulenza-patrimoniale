@@ -17,9 +17,6 @@ init_state()
 sections = {
     "🏠 Famiglia e situazione personale": [],
     "💼 Area patrimoniale": [
-        "Indirizzo immobile", "Intestatario e quota", "Valore stimato", "Uso", "Mutui o vincoli presenti",
-        "Conti correnti", "Investimenti", "Polizze vita", "Fondi pensione",
-        "Debiti personali", "Fideiussioni", "Leasing o finanziamenti"
     ],
     "⚖️ Pianificazione successoria e protezione": [
         "Nome erede, data nascita, parentela, situazione patrimoniale, note",
@@ -144,3 +141,37 @@ with tabs[-1]:
             file_name="Scheda_Consulenza_Patrimoniale.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
+with tabs[1]:
+    st.header("💼 Area patrimoniale")
+
+    if "patrimonio_count" not in st.session_state:
+        st.session_state.patrimonio_count = 0
+        st.session_state.patrimonio_voci = []
+
+    if st.button("➕ Aggiungi voce patrimoniale"):
+        st.session_state.patrimonio_count += 1
+
+    patrimonio = []
+    for i in range(st.session_state.patrimonio_count):
+        with st.expander(f"Voce patrimoniale #{i+1}"):
+            tipo = st.selectbox(f"Tipo di patrimonio #{i+1}", [
+                "Immobile", "Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale", "Altro"
+            ], key=f"tipo_patr_{i}")
+
+            descrizione = st.text_input(f"Descrizione sintetica #{i+1}", key=f"desc_patr_{i}")
+            intestatario = st.text_input(f"Intestatario #{i+1}", key=f"intestatario_patr_{i}")
+            note = st.text_area(f"Note o dettagli aggiuntivi #{i+1}", key=f"note_patr_{i}")
+
+            if tipo in ["Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale"]:
+                valore = st.number_input(f"Valore stimato in euro #{i+1}", min_value=0.0, step=1000.0, key=f"valore_patr_{i}")
+                patrimonio.append(f"{tipo} - {descrizione} | Valore: {valore:.2f}€ | Intestatario: {intestatario} | Note: {note}")
+            else:
+                patrimonio.append(f"{tipo} - {descrizione} | Intestatario: {intestatario} | Note: {note}")
+
+    st.session_state.responses["Patrimonio dettagliato"] = patrimonio
+
+            patrimonio.append(f"{tipo} - {descrizione} | Valore: {valore}€ | Intestatario: {intestatario} | Note: {note}")
+
+    st.session_state.responses["Patrimonio dettagliato"] = patrimonio
+
