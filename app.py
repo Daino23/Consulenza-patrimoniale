@@ -153,11 +153,14 @@ with tabs[1]:
         st.session_state.patrimonio_count += 1
 
     patrimonio = []
+
     for i in range(st.session_state.patrimonio_count):
         with st.expander(f"Voce patrimoniale #{i+1}"):
-            tipo = st.selectbox(f"Tipo di patrimonio #{i+1}", [
-                "Immobile", "Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale", "Altro"
-            ], key=f"tipo_patr_{i}")
+            tipo = st.selectbox(
+                f"Tipo di patrimonio #{i+1}",
+                ["Immobile", "Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale", "Altro"],
+                key=f"tipo_patr_{i}"
+            )
 
             descrizione = st.text_input(f"Descrizione sintetica #{i+1}", key=f"desc_patr_{i}")
             intestatario = st.text_input(f"Intestatario #{i+1}", key=f"intestatario_patr_{i}")
@@ -165,13 +168,11 @@ with tabs[1]:
 
             if tipo in ["Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale"]:
                 valore = st.number_input(f"Valore stimato in euro #{i+1}", min_value=0.0, step=1000.0, key=f"valore_patr_{i}")
-                patrimonio.append(f"{tipo} - {descrizione} | Valore: {valore:.2f}€ | Intestatario: {intestatario} | Note: {note}")
+                riga = f"{tipo} - {descrizione} | Valore: {valore:.2f} € | Intestatario: {intestatario} | Note: {note}"
             else:
-                patrimonio.append(f"{tipo} - {descrizione} | Intestatario: {intestatario} | Note: {note}")
+                riga = f"{tipo} - {descrizione} | Intestatario: {intestatario} | Note: {note}"
 
-    st.session_state.responses["Patrimonio dettagliato"] = patrimonio
-
-            patrimonio.append(f"{tipo} - {descrizione} | Valore: {valore}€ | Intestatario: {intestatario} | Note: {note}")
+            patrimonio.append(riga)
 
     st.session_state.responses["Patrimonio dettagliato"] = patrimonio
 
