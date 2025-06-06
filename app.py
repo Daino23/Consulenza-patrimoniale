@@ -82,7 +82,23 @@ with tabs[0]:
     st.session_state.responses["Occupazione"] = st.text_input("Occupazione")
     st.session_state.responses["Reddito lordo annuo"] = st.text_input("Reddito lordo annuo")
     st.session_state.responses["Altri redditi"] = st.text_area("Altri redditi")
-    st.session_state.responses["Debiti ricorrenti"] = st.text_area("Debiti ricorrenti")
+   st.subheader("💳 Debiti ricorrenti")
+
+if "debiti_count" not in st.session_state:
+    st.session_state.debiti_count = 0
+    st.session_state.debiti = []
+
+if st.button("➕ Aggiungi debito ricorrente"):
+    st.session_state.debiti_count += 1
+
+debiti_input = []
+for i in range(st.session_state.debiti_count):
+    with st.expander(f"Debito ricorrente #{i+1}"):
+        tipo = st.text_input(f"Tipo di debito #{i+1}", key=f"tipo_debito_{i}")
+        importo = st.number_input(f"Importo mensile in euro #{i+1}", min_value=0.0, step=10.0, key=f"importo_debito_{i}")
+        debiti_input.append(f"{tipo} - {importo:.2f} € / mese")
+
+st.session_state.responses["Debiti ricorrenti"] = debiti_input
 
 # TAB 1 - Area patrimoniale
 with tabs[1]:
