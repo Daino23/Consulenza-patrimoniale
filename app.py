@@ -81,9 +81,6 @@ with tab_objects[0]:
             familiari.append(f"{nome} ({relazione}) - CF: {codice}")
     st.session_state.responses["Altri familiari a carico"] = familiari
 
-    if st.button("Prosegui ➡️", key="step1"):
-        st.session_state.tab_index = 1
-
 with tab_objects[1]:
     st.header("💼 Area patrimoniale")
     if st.button("➕ Aggiungi bene patrimoniale"):
@@ -99,9 +96,6 @@ with tab_objects[1]:
             patrimonio.append(f"{tipo} - {descrizione} - {intestatario} - {valore:.2f} €")
     st.session_state.responses["Situazione patrimoniale"] = patrimonio
 
-    if st.button("Prosegui ➡️", key="step2"):
-        st.session_state.tab_index = 2
-
 with tab_objects[2]:
     st.header("💳 Debiti ricorrenti")
     if st.button("➕ Aggiungi debito"):
@@ -114,9 +108,6 @@ with tab_objects[2]:
             importo = st.number_input(f"Importo mensile € #{i+1}", min_value=0.0, step=10.0, key=f"deb_importo_{i}")
             debiti.append(f"{tipo} - {importo:.2f} € / mese")
     st.session_state.responses["Debiti ricorrenti"] = debiti
-
-    if st.button("Prosegui ➡️", key="step3"):
-        st.session_state.tab_index = 3
 
 with tab_objects[3]:
     st.header("🎯 Obiettivi economici")
@@ -132,9 +123,6 @@ with tab_objects[3]:
             tempo = st.text_input(f"Tempo previsto (es. 12 mesi) #{i+1}", key=f"ob_tempo_{i}")
             obiettivi.append(f"{descrizione} | {importo:.2f} € entro {tempo}")
     st.session_state.responses["Obiettivi economici"] = obiettivi
-
-    if st.button("Prosegui ➡️", key="step4"):
-        st.session_state.tab_index = 4
 
 with tab_objects[4]:
     st.header("📄 Genera documento Word")
