@@ -1,3 +1,4 @@
+
 import streamlit as st
 from docx import Document
 from datetime import date
@@ -6,18 +7,15 @@ from io import BytesIO
 st.set_page_config(page_title="Consulenza Patrimoniale - Studio Dainotti", layout="wide")
 st.title("Scheda Consulenza Patrimoniale - Studio Dainotti")
 
-# Inizializza lo stato
 def init_state():
     if "responses" not in st.session_state:
         st.session_state.responses = {}
 
 init_state()
 
-# Sezioni (Famiglia è dinamica)
 sections = {
     "🏠 Famiglia e situazione personale": [],
-    "💼 Area patrimoniale": [
-    ],
+    "💼 Area patrimoniale": [],
     "⚖️ Pianificazione successoria e protezione": [
         "Nome erede, data nascita, parentela, situazione patrimoniale, note",
         "Donazioni previste", "Beni da destinare specificamente", "Diritti da riservare", "Testamento previsto", "Obiettivo evitare conflitti",
@@ -35,15 +33,13 @@ sections = {
 tab_titles = list(sections.keys()) + ["📄 Esporta documento"]
 tabs = st.tabs(tab_titles)
 
-# TAB 0 - Famiglia (dinamico)
+# TAB 0 - Famiglia
 with tabs[0]:
     st.header("🏠 Famiglia e situazione personale")
-
     st.session_state.responses["Nome e cognome"] = st.text_input("Nome e cognome")
     st.session_state.responses["Data e luogo di nascita"] = st.text_input("Data e luogo di nascita")
     st.session_state.responses["Codice fiscale"] = st.text_input("Codice fiscale")
     st.session_state.responses["Indirizzo"] = st.text_input("Indirizzo")
-    
     stato_civile = st.selectbox("Stato civile", ["", "Celibe/Nubile", "Coniugato/a", "Separato/a", "Divorziato/a", "Vedovo/a"])
     st.session_state.responses["Stato civile"] = stato_civile
 
@@ -88,16 +84,58 @@ with tabs[0]:
     st.session_state.responses["Altri redditi"] = st.text_area("Altri redditi")
     st.session_state.responses["Debiti ricorrenti"] = st.text_area("Debiti ricorrenti")
 
-# Altri tab statici
-for i, section in enumerate(list(sections.keys())[1:]):
-    with tabs[i+1]:
-        st.header(section)
-        for question in sections[section]:
-            response = st.text_area(question, key=question)
-            st.session_state.responses[question] = response
+# TAB 1 - Area patrimoniale
+with tabs[1]:
+    st.header("💼 Area patrimoniale")
+    if "patrimonio_count" not in st.session_state:
+        st.session_state.patrimonio_count = 0
+        st.session_state.patrimonio_voci = []
 
-# TAB Finale - Esporta
-with tabs[-1]:
+    if st.button("➕ Aggiungi voce patrimoniale"):
+        st.session_state.patrimonio_count += 1
+
+    patrimonio = []
+    for i in range(st.session_state.patrimonio_count):
+        with st.expander(f"Voce patrimoniale #{i+1}"):
+            tipo = st.selectbox(f"Tipo di patrimonio #{i+1}", [
+                "Immobile", "Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale", "Altro"
+            ], key=f"tipo_patr_{i}")
+            descrizione = st.text_input(f"Descrizione sintetica #{i+1}", key=f"desc_patr_{i}")
+            intestatario = st.text_input(f"Intestatario #{i+1}", key=f"intestatario_patr_{i}")
+            note = st.text_area(f"Note o dettagli aggiuntivi #{i+1}", key=f"note_patr_{i}")
+
+            if tipo in ["Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale"]:
+                valore = st.number_input(f"Valore stimato in euro #{i+1}", min_value=0.0, step=1000.0, key=f"valore_patr_{i}")
+                riga = f"{tipo} - {descrizione} | Valore: {valore:.2f} € | Intestatario: {intestatario} | Note: {note}"
+            else:
+                riga = f"{tipo} - {descrizione} | Intestatario: {intestatario} | Note: {note}"
+            patrimonio.append(riga)
+
+    st.session_state.responses["Patrimonio dettagliato"] = patrimonio
+
+# TAB 2 - Pianificazione successoria
+with tabs[2]:
+    st.header("⚖️ Pianificazione successoria e protezione")
+    for question in sections["⚖️ Pianificazione successoria e protezione"]:
+        response = st.text_area(question, key=question)
+        st.session_state.responses[question] = response
+
+# TAB 3 - Obiettivi
+with tabs[3]:
+    st.header("🔍 Obiettivi e bisogni")
+    for question in sections["🔍 Obiettivi e bisogni"]:
+        response = st.text_area(question, key=question)
+        st.session_state.responses[question] = response
+
+# TAB 4 - Allegati
+with tabs[4]:
+    st.header("📎 Allegati richiesti")
+    for question in sections["📎 Allegati richiesti"]:
+        response = st.text_area(question, key=question)
+        st.session_state.responses[question] = response
+
+# TAB 5 - Esporta
+with tabs[5]:
     st.header("📄 Esporta il documento Word finale")
 
     st.subheader("🔍 Riepilogo delle risposte")
@@ -115,7 +153,6 @@ with tabs[-1]:
         header = doc.sections[0].header.paragraphs[0]
         header.text = "Studio Dainotti - Consulenza patrimoniale, tributaria e del credito\n" \
                       "Via Roma 52, Porto Valtravaglia (VA) - www.dainotti.com - info@dainotti.com"
-
         doc.add_paragraph(f"Data compilazione: {date.today().strftime('%d/%m/%Y')}")
         doc.add_heading("Scheda Raccolta Informazioni - Consulenza Patrimoniale", 0)
 
@@ -141,38 +178,3 @@ with tabs[-1]:
             file_name="Scheda_Consulenza_Patrimoniale.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
-
-with tabs[1]:
-    st.header("💼 Area patrimoniale")
-
-    if "patrimonio_count" not in st.session_state:
-        st.session_state.patrimonio_count = 0
-        st.session_state.patrimonio_voci = []
-
-    if st.button("➕ Aggiungi voce patrimoniale"):
-        st.session_state.patrimonio_count += 1
-
-    patrimonio = []
-
-    for i in range(st.session_state.patrimonio_count):
-        with st.expander(f"Voce patrimoniale #{i+1}"):
-            tipo = st.selectbox(
-                f"Tipo di patrimonio #{i+1}",
-                ["Immobile", "Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale", "Altro"],
-                key=f"tipo_patr_{i}"
-            )
-
-            descrizione = st.text_input(f"Descrizione sintetica #{i+1}", key=f"desc_patr_{i}")
-            intestatario = st.text_input(f"Intestatario #{i+1}", key=f"intestatario_patr_{i}")
-            note = st.text_area(f"Note o dettagli aggiuntivi #{i+1}", key=f"note_patr_{i}")
-
-            if tipo in ["Conto corrente", "Fondo comune", "ETF", "Trust", "Polizza vita", "Quota aziendale"]:
-                valore = st.number_input(f"Valore stimato in euro #{i+1}", min_value=0.0, step=1000.0, key=f"valore_patr_{i}")
-                riga = f"{tipo} - {descrizione} | Valore: {valore:.2f} € | Intestatario: {intestatario} | Note: {note}"
-            else:
-                riga = f"{tipo} - {descrizione} | Intestatario: {intestatario} | Note: {note}"
-
-            patrimonio.append(riga)
-
-    st.session_state.responses["Patrimonio dettagliato"] = patrimonio
-
