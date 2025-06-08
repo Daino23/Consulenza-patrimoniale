@@ -8,8 +8,9 @@ from sezioni.debiti import sezione_debiti
 from sezioni.obiettivi import sezione_obiettivi
 from sezioni.documenti import sezione_documenti
 from sezioni.dashboard import sezione_dashboard
-from sezioni.gestione_progetti import sezione_gestione_progetti # Nuova importazione
-from sezioni.todo_list import sezione_todo_list # Nuova importazione
+from sezioni.gestione_progetti import sezione_gestione_progetti
+from sezioni.todo_list import sezione_todo_list
+from sezioni.crm import sezione_crm
 
 
 # Inizializzazione dello stato sessione per i contatori della dashboard
@@ -48,7 +49,11 @@ def main():
             "Obiettivi",
             "Documenti",
             "Gestione Progetti", # <--- Aggiunta nuova sezione
-            "To-Do List"          # <--- Aggiunta nuova sezione
+            "To-Do List" ,
+             "CRM" 
+            # <--- AGGIUNGI QUESTA LINEA
+        ])
+            # <--- Aggiunta nuova sezione
         ])
 
     # Logica per la visualizzazione delle sezioni
@@ -68,6 +73,8 @@ def main():
         sezione_gestione_progetti()
     elif sezione == "To-Do List":          # <--- Aggiunta nuova sezione
         sezione_todo_list()
+    elif sezione == "CRM": # <--- AGGIUNGI QUESTE LINEE
+        sezione_crm()  
 
 
 if __name__ == "__main__":
