@@ -6,6 +6,10 @@ if "familiari_count" not in st.session_state:
     st.session_state.familiari_count = 0
 if "patrimonio_count" not in st.session_state:
     st.session_state.patrimonio_count = 0
+if "debiti_count" not in st.session_state:
+    st.session_state.debiti_count = 0
+if "obiettivi_count" not in st.session_state:
+    st.session_state.obiettivi_count = 0
 
 # Funzione principale per eseguire tutte le sezioni
 
@@ -23,12 +27,16 @@ def main():
 
     with st.sidebar:
         st.markdown("## Navigazione")
-        sezione = st.radio("Vai alla sezione:", ["Famiglia", "Patrimonio"])
+        sezione = st.radio("Vai alla sezione:", ["Famiglia", "Patrimonio", "Debiti", "Obiettivi"])
 
     if sezione == "Famiglia":
         sezione_famiglia()
     elif sezione == "Patrimonio":
         sezione_patrimonio()
+    elif sezione == "Debiti":
+        sezione_debiti()
+    elif sezione == "Obiettivi":
+        sezione_obiettivi()
 
 
 # Sezione: Famiglia e situazione personale
@@ -92,6 +100,31 @@ def sezione_patrimonio():
             patrimonio.append(f"{tipo} - {descrizione} - {intestatario} - {valore:.2f} €")
 
     return patrimonio
+
+
+# Sezione: Debiti
+def sezione_debiti():
+    st.header("\U0001F4B3 Debiti ricorrenti")
+    if st.button("➕ Aggiungi debito"):
+        st.session_state.debiti_count += 1
+
+    for i in range(st.session_state.debiti_count):
+        with st.expander(f"Debito #{i+1}"):
+            st.text_input(f"Tipo #{i+1}", key=f"deb_tipo_{i}")
+            st.number_input(f"Importo mensile € #{i+1}", min_value=0.0, step=10.0, key=f"deb_importo_{i}")
+
+
+# Sezione: Obiettivi
+def sezione_obiettivi():
+    st.header("\U0001F3AF Obiettivi economici")
+    if st.button("➕ Aggiungi obiettivo"):
+        st.session_state.obiettivi_count += 1
+
+    for i in range(st.session_state.obiettivi_count):
+        with st.expander(f"Obiettivo #{i+1}"):
+            st.text_input(f"Descrizione #{i+1}", key=f"ob_desc_{i}")
+            st.number_input(f"Importo da raggiungere (€) #{i+1}", min_value=0.0, step=500.0, key=f"ob_importo_{i}")
+            st.text_input(f"Tempo previsto (es. 12 mesi) #{i+1}", key=f"ob_tempo_{i}")
 
 
 # Avvio dell'app
