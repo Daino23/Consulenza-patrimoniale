@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import date
-from sezioni.dashboard import sezione_dashboard
 from sezioni.famiglia import sezione_famiglia
 from sezioni.patrimonio import sezione_patrimonio
 from sezioni.debiti import sezione_debiti
