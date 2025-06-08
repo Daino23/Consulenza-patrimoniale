@@ -1,128 +1,55 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
+from datetime import datetime # Necessario per datetime.fromisoformat
 
 def sezione_documenti():
     st.subheader("📄 Generazione Documenti")
     st.write("Genera un file Excel con i dati inseriti nelle altre sezioni.")
 
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        # Recupera i dati da st.session_state, ora sono dizionari o liste di dizionari
-        
-        # Dati Cliente Anagrafica (cliente_anagrafica.py)
-        if 'cliente_data' in st.session_state and st.session_state.cliente_data:
-            df_cliente_personale = pd.DataFrame([st.session_state.cliente_data['dati_personali']])
-            df_cliente_personale.to_excel(writer, index=False, sheet_name="Cliente_DatiPersonali")
-
-            df_cliente_profilo = pd.DataFrame([st.session_state.cliente_data['profilo_finanziario']])
-            df_cliente_profilo.to_excel(writer, index=False, sheet_name="Cliente_ProfiloFin")
-
-            if st.session_state.cliente_data['dati_familiari'].get('coniuge'):
-                df_coniuge = pd.DataFrame([st.session_state.cliente_data['dati_familiari']['coniuge']])
-                df_coniuge.to_excel(writer, index=False, sheet_name="Cliente_Coniuge")
-            
-            if st.session_state.cliente_data['dati_familiari'].get('figli'):
-                df_figli = pd.DataFrame(st.session_state.cliente_data['dati_familiari']['figli'])
-                df_figli.to_excel(writer, index=False, sheet_name="Cliente_Figli")
-            
-            if st.session_state.cliente_data['dati_familiari'].get('altri_familiari'):
-                df_altri_fam = pd.DataFrame(st.session_state.cliente_data['dati_familiari']['altri_familiari'])
-                df_altri_fam.to_excel(writer, index=False, sheet_name="Cliente_AltriFamiliari")
-
-        # Dati Patrimonio (da lista di dizionari)
-        if st.session_state.get("beni_patrimoniali"):
-            df_patrimonio = pd.DataFrame(st.session_state.beni_patrimoniali)
-            df_patrimonio.to_excel(writer, index=False, sheet_name="Patrimonio")
-
-        # Dati Debiti (da lista di dizionari)
-        if st.session_state.get("lista_debiti"):
-            df_debiti = pd.DataFrame(st.session_state.lista_debiti)
-            df_debiti.to_excel(writer, index=False, sheet_name="Debiti")
-
-        # Dati Obiettivi (da lista di dizionari)
-        if st.session_state.get("lista_obiettivi"):
-            df_obiettivi = pd.DataFrame(st.session_state.lista_obiettivi)
-            df_obiettivi.to_excel(writer, index=False, sheet_name="Obiettivi")
-            
-    if st.button("📥 Scarica Riepilogo Completo in Excel"):
-        output.seek(0)
-        st.download_button(
-            label="Clicca per Scaricare l'Excel",
-            data=output,
-            file_name="riepilogo_consulenza.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-    # Contenuto del file: sezioni/documenti.py
-
-import streamlit as st
-import pandas as pd
-from io import BytesIO
-import base64 # Necessario per il download di file (se non già presente)
-
-def sezione_documenti():
-    st.subheader("📄 Generazione Documenti")
-    st.write("Genera un file Excel con i dati numerici inseriti nelle altre sezioni.")
-
-    # Esempio di dati numerici di esempio. In futuro raccoglieremo quelli reali da session_state.
-    # Questo recupero dei dati è generico, assicurati che le chiavi in session_state corrispondano
-    # ai nomi effettivi delle liste o dei dizionari salvati dalle altre sezioni.
-    # Per Anagrafica Cliente, si userà st.session_state.cliente_data
-    # Per Patrimonio, Debiti, Obiettivi, si useranno le liste che contengono i dettagli
-    # es: st.session_state.get("patrimonio_list_details", []) se salvi lì i dati dettagliati.
-    # Altrimenti, dovresti iterare su st.session_state.patrimonio_count per recuperare i singoli input.
-
-    # Adattamento per recuperare i dati come salvati nelle sezioni (es. da cliente_anagrafica.py)
-    # E' un po' più complesso recuperare i dati dettagliati dalle liste dinamiche come patrimonio, debiti, obiettivi
-    # perché sono salvati come stringhe per la visualizzazione.
-    # Per una vera esportazione, dovremmo salvare i dati strutturati (es. liste di dizionari) e non solo stringhe.
-    # Per ora, useremo i dati che sono già accessibili e aggiungeremo un placeholder per gli altri.
-
-    # Dati da Anagrafica Cliente
+    # --- Prepara i dati da esportare recuperandoli da st.session_state ---
     cliente_data = st.session_state.get("cliente_data", {})
     dati_personali_cliente = cliente_data.get("dati_personali", {})
     dati_familiari_cliente = cliente_data.get("dati_familiari", {})
+    profilo_finanziario_cliente = cliente_data.get("profilo_finanziario", {})
 
-    # Dati da Patrimonio, Debiti, Obiettivi (se salvati come liste di dizionari o strutturati)
-    # Se le tue sezioni Patrimonio, Debiti, Obiettivi salvano solo stringhe aggregate,
-    # qui dovrai recuperare i singoli campi come nell'esempio.
-    # Assumiamo che le sezioni salvino i dati come liste di dizionari per una migliore esportazione.
-    # Esempio:
-    # `patrimonio_items = st.session_state.get("patrimonio_items", [])` (se salvati in questo modo)
-    # Vado a prendere i dati come attualmente generati nei tuoi file:
     patrimonio_values = []
     for i in range(st.session_state.get('patrimonio_count', 0)):
-        try: # Try-except per gestire chiavi mancanti se l'utente non ha inserito tutto
-            tipo = st.session_state[f"tipo_{i}"]
-            descrizione = st.session_state[f"desc_{i}"]
-            intestatario = st.session_state[f"intest_{i}"]
-            valore = st.session_state[f"valore_{i}"]
+        try:
+            tipo = st.session_state.get(f"tipo_{i}", "N/A")
+            descrizione = st.session_state.get(f"desc_{i}", "N/A")
+            intestatario = st.session_state.get(f"intest_{i}", "N/A")
+            valore = st.session_state.get(f"valore_{i}", 0.0)
             patrimonio_values.append({"Tipo": tipo, "Descrizione": descrizione, "Intestatario": intestatario, "Valore": valore})
-        except KeyError:
-            pass # Skip if data is incomplete
+        except Exception:
+            pass
 
     debiti_values = []
     for i in range(st.session_state.get('debiti_count', 0)):
         try:
-            tipo = st.session_state[f"deb_tipo_{i}"]
-            importo = st.session_state[f"deb_importo_{i}"]
+            tipo = st.session_state.get(f"deb_tipo_{i}", "N/A")
+            importo = st.session_state.get(f"deb_importo_{i}", 0.0)
             debiti_values.append({"Tipo": tipo, "Importo Mensile": importo})
-        except KeyError:
+        except Exception:
             pass
 
     obiettivi_values = []
     for i in range(st.session_state.get('obiettivi_count', 0)):
         try:
-            descrizione = st.session_state[f"ob_desc_{i}"]
-            importo = st.session_state[f"ob_importo_{i}"]
-            tempo = st.session_state[f"ob_tempo_{i}"]
+            descrizione = st.session_state.get(f"ob_desc_{i}", "N/A")
+            importo = st.session_state.get(f"ob_importo_{i}", 0.0)
+            tempo = st.session_state.get(f"ob_tempo_{i}", "N/A")
             obiettivi_values.append({"Descrizione": descrizione, "Importo Target": importo, "Tempo Previsto": tempo})
-        except KeyError:
+        except Exception:
             pass
+    
+    # Dati da CRM (se presenti)
+    crm_clients = st.session_state.get("crm_clients", [])
 
 
-    if st.button("📥 Scarica riepilogo in Excel"):
+    # --- Logica per la generazione e il download del file Excel ---
+    # Controlla se ci sono dati significativi prima di generare l'Excel
+    if dati_personali_cliente or patrimonio_values or debiti_values or obiettivi_values or crm_clients:
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # Scheda Dati Anagrafici
@@ -144,6 +71,11 @@ def sezione_documenti():
                 if familiari_list:
                     df_familiari = pd.DataFrame(familiari_list)
                     df_familiari.to_excel(writer, index=False, sheet_name="Composizione Familiare")
+            
+            # Scheda Profilo Finanziario
+            if profilo_finanziario_cliente:
+                df_profilo_finanziario = pd.DataFrame([profilo_finanziario_cliente])
+                df_profilo_finanziario.to_excel(writer, index=False, sheet_name="Profilo Finanziario")
 
             # Scheda Patrimonio
             if patrimonio_values:
@@ -159,15 +91,42 @@ def sezione_documenti():
             if obiettivi_values:
                 df_obi = pd.DataFrame(obiettivi_values)
                 df_obi.to_excel(writer, index=False, sheet_name="Obiettivi")
+            
+            # Scheda Clienti CRM
+            if crm_clients:
+                # Per i clienti CRM, potremmo voler esportare anche le interazioni
+                # ma per ora esportiamo solo i dati principali dei clienti
+                crm_df_data = []
+                for client in crm_clients:
+                    client_copy = client.copy()
+                    client_copy.pop('interactions', None) # Rimuove le interazioni per la tabella principale
+                    crm_df_data.append(client_copy)
+                
+                df_crm_clients = pd.DataFrame(crm_df_data)
+                df_crm_clients.to_excel(writer, index=False, sheet_name="CRM_Clienti")
 
-        output.seek(0)
+                # Volendo, si potrebbe creare una scheda separata per tutte le interazioni
+                all_interactions = []
+                for client in crm_clients:
+                    for interaction in client.get('interactions', []):
+                        interaction_copy = interaction.copy()
+                        interaction_copy['Client_Name'] = client['name'] # Aggiungi il nome del cliente
+                        all_interactions.append(interaction_copy)
+                if all_interactions:
+                    df_crm_interactions = pd.DataFrame(all_interactions)
+                    df_crm_interactions.to_excel(writer, index=False, sheet_name="CRM_Interazioni")
+
+
+        output.seek(0) # Riporta il cursore all'inizio del buffer
         st.download_button(
-            label="Clicca qui per scaricare",
-            data=output.getvalue(),
-            file_name="riepilogo_cliente.xlsx",
+            label="📥 Scarica Riepilogo Completo in Excel",
+            data=output.getvalue(), # È fondamentale usare .getvalue() per ottenere i byte
+            file_name="riepilogo_consulenza.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-    
+    else:
+        st.info("Nessun dato significativo da scaricare ancora. Compila le sezioni Anagrafica Cliente, Patrimonio, Debiti, Obiettivi o CRM.")
+
     st.markdown("---") # Linea separatrice
 
     # --- Sezione Calcolatrice ---
@@ -183,25 +142,33 @@ def sezione_documenti():
 
     operation = st.selectbox("Seleziona Operazione", ["+", "-", "*", "/"], key="calc_op")
 
-    result = 0
+    # Inizializza il risultato della calcolatrice se non esiste
+    if "calc_result" not in st.session_state:
+        st.session_state["calc_result"] = 0.0
+
     if st.button("Calcola", key="calc_button"):
         if operation == "+":
-            result = num1 + num2
+            st.session_state["calc_result"] = num1 + num2
         elif operation == "-":
-            result = num1 - num2
+            st.session_state["calc_result"] = num1 - num2
         elif operation == "*":
-            result = num1 * num2
+            st.session_state["calc_result"] = num1 * num2
         elif operation == "/":
             if num2 != 0:
-                result = num1 / num2
+                st.session_state["calc_result"] = num1 / num2
             else:
                 st.error("Errore: Divisione per zero!")
-                result = "Non definito"
-        st.success(f"Risultato: {result:.2f}") # Formatta il risultato a due decimali
-        st.session_state["calc_result"] = result # Salva il risultato per persistenza nella sessione
+                st.session_state["calc_result"] = "Non definito" # Gestisce l'errore nel risultato
+        
+        # Mostra il risultato subito dopo il calcolo
+        if isinstance(st.session_state["calc_result"], (float, int)):
+            st.success(f"Risultato: {st.session_state['calc_result']:.2f}")
+        else:
+            st.success(f"Risultato: {st.session_state['calc_result']}") # Per "Non definito"
+        st.rerun() # Forza il refresh per aggiornare il risultato persistente
 
-    # Mostra il risultato persistente se già calcolato
-    if "calc_result" in st.session_state:
-        st.write(f"Ultimo Risultato Calcolato: {st.session_state['calc_result']:.2f}")
+    # Mostra l'ultimo risultato calcolato (persistente nella sessione)
+    if isinstance(st.session_state["calc_result"], (float, int)):
+        st.write(f"Ultimo Risultato Calcolato: **{st.session_state['calc_result']:.2f}**")
     else:
-        st.info("Nessun dato da scaricare ancora. Compila le sezioni!")
+        st.write(f"Ultimo Risultato Calcolato: **{st.session_state['calc_result']}**")
