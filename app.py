@@ -5,7 +5,7 @@ from sezioni.patrimonio import sezione_patrimonio
 from sezioni.debiti import sezione_debiti
 from sezioni.obiettivi import sezione_obiettivi
 from sezioni.documenti import sezione_documenti
-from sezioni.dashboard import sezione_dashboard
+from sezioni.dashboard import sezione_dashboard # Importazione corretta
 
 # Inizializzazione dello stato sessione
 if "familiari_count" not in st.session_state:
@@ -33,6 +33,7 @@ def main():
     with st.sidebar:
         st.markdown("## Navigazione")
         sezione = st.radio("Vai alla sezione:", [
+            "Dashboard",    # <-- Aggiunta della Dashboard nel menu
             "Famiglia",
             "Patrimonio",
             "Debiti",
@@ -40,7 +41,10 @@ def main():
             "Documenti"
         ])
 
-    if sezione == "Famiglia":
+    # Logica per la visualizzazione delle sezioni
+    if sezione == "Dashboard": # <-- Gestione della selezione della Dashboard
+        sezione_dashboard()
+    elif sezione == "Famiglia":
         sezione_famiglia()
     elif sezione == "Patrimonio":
         sezione_patrimonio()
