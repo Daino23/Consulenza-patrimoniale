@@ -5,7 +5,6 @@ from sezioni.patrimonio import sezione_patrimonio
 from sezioni.debiti import sezione_debiti
 from sezioni.obiettivi import sezione_obiettivi
 from sezioni.documenti import sezione_documenti
-from sezioni.dashboard import sezione_dashboard
 
 # Inizializzazione dello stato sessione
 if "familiari_count" not in st.session_state:
