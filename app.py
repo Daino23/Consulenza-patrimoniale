@@ -4,6 +4,7 @@ from sezioni.famiglia import sezione_famiglia
 from sezioni.patrimonio import sezione_patrimonio
 from sezioni.debiti import sezione_debiti
 from sezioni.obiettivi import sezione_obiettivi
+from sezioni.documenti import sezione_documenti
 
 # Inizializzazione dello stato sessione
 if "familiari_count" not in st.session_state:
@@ -30,7 +31,13 @@ def main():
 
     with st.sidebar:
         st.markdown("## Navigazione")
-        sezione = st.radio("Vai alla sezione:", ["Famiglia", "Patrimonio", "Debiti", "Obiettivi"])
+        sezione = st.radio("Vai alla sezione:", [
+            "Famiglia",
+            "Patrimonio",
+            "Debiti",
+            "Obiettivi",
+            "Documenti"
+        ])
 
     if sezione == "Famiglia":
         sezione_famiglia()
@@ -40,6 +47,8 @@ def main():
         sezione_debiti()
     elif sezione == "Obiettivi":
         sezione_obiettivi()
+    elif sezione == "Documenti":
+        sezione_documenti()
 
 # Avvio dell'app
 if __name__ == "__main__":
