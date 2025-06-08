@@ -53,8 +53,7 @@ def main():
              "CRM" 
             # <--- AGGIUNGI QUESTA LINEA
         ])
-            # <--- Aggiunta nuova sezione
-        ])
+       
 
     # Logica per la visualizzazione delle sezioni
     if sezione == "Dashboard":
