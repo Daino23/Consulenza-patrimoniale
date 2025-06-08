@@ -7,6 +7,30 @@ if "familiari_count" not in st.session_state:
 if "patrimonio_count" not in st.session_state:
     st.session_state.patrimonio_count = 0
 
+# Funzione principale per eseguire tutte le sezioni
+
+def main():
+    st.set_page_config(page_title="Consulenza Patrimoniale - Studio Dainotti", layout="wide")
+    st.title("Scheda Consulenza Patrimoniale - Studio Dainotti")
+
+    st.markdown("""
+        <style>
+        .block-container {
+            padding-top: 2rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    with st.sidebar:
+        st.markdown("## Navigazione")
+        sezione = st.radio("Vai alla sezione:", ["Famiglia", "Patrimonio"])
+
+    if sezione == "Famiglia":
+        sezione_famiglia()
+    elif sezione == "Patrimonio":
+        sezione_patrimonio()
+
+
 # Sezione: Famiglia e situazione personale
 def sezione_famiglia():
     st.header("\U0001F3E0 Famiglia e situazione personale")
@@ -51,6 +75,7 @@ def sezione_famiglia():
 
     return responses
 
+
 # Sezione: Patrimonio
 def sezione_patrimonio():
     st.header("\U0001F4BC Area patrimoniale")
@@ -67,3 +92,8 @@ def sezione_patrimonio():
             patrimonio.append(f"{tipo} - {descrizione} - {intestatario} - {valore:.2f} €")
 
     return patrimonio
+
+
+# Avvio dell'app
+if __name__ == "__main__":
+    main()
